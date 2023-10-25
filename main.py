@@ -13,6 +13,11 @@ class DHT22GUI(QWidget):
 
         self.init_ui()
 
+        # Create a QTimer for automatic updates
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.read_sensor_data)
+        self.timer.start(60000)  # 60,000 milliseconds = 60 seconds
+
     def init_ui(self):
         self.setStyleSheet("background-color: black; color: white;")
 
@@ -39,8 +44,8 @@ class DHT22GUI(QWidget):
     def read_sensor_data(self):
         humidity, temperature = Adafruit_DHT.read_retry(self.sensor, self.sensor_pin)
         if humidity is not None and temperature is not None:
-            current_time = QDateTime.currentDateTime().toString("yyyy-MM-dd HH:mm:ss")
-            data = "Time: {}\nTemp: {:.1f}°C\nHumidity: {:.1f}%".format(current_time, temperature, humidity)
+            current_time = QDateTime.currentDateTime().toString("HH:mm:ss")
+            data = "Last update: {}\nTemperature: {:.1f}°C\nHumidity: {:.1f}%".format(current_time, temperature, humidity)
             self.result_label.setText(data)
         else:
             self.result_label.setText("Sensor failure.")
