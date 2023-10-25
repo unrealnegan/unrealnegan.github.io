@@ -6,7 +6,7 @@ from PyQt5.QtGui import QFont
 
 class DHT22GUI(QWidget):
     def __init__(self):
-        super().__init__()
+        super().__init()
 
         self.sensor = Adafruit_DHT.DHT22
         self.sensor_pin = 4
@@ -17,9 +17,12 @@ class DHT22GUI(QWidget):
         self.setStyleSheet("background-color: black; color: white;")
 
         self.result_label = QLabel(self)
-        self.result_label.setFont(QFont("Helvetica", 16))
+        self.result_label.setFont(QFont("Helvetica", 16)
         self.update_button = QPushButton("Update", self)
         self.quit_button = QPushButton("Quit", self)
+
+        # Set button style (transparent with red border)
+        self.update_button.setStyleSheet("background-color: transparent; border: 2px solid red; color: white;")
 
         layout = QVBoxLayout()
         layout.addWidget(self.result_label)
@@ -39,7 +42,7 @@ class DHT22GUI(QWidget):
     def read_sensor_data(self):
         humidity, temperature = Adafruit_DHT.read_retry(self.sensor, self.sensor_pin)
         if humidity is not None and temperature is not None:
-            current_time = QDateTime.currentDateTime().toString("HH:mm:ss")
+            current_time = QDateTime.currentDateTime().toString("yyyy-MM-dd HH:mm:ss")
             data = "Time: {}\nTemp={:.1f}°C, Humidity={:.1f}%".format(current_time, temperature, humidity)
             self.result_label.setText(data)
         else:
