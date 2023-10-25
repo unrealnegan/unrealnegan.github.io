@@ -1,12 +1,12 @@
 import Adafruit_DHT
 import sys
 from PyQt5.QtCore import QTimer, QDateTime
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QVBoxLayout
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QVBoxLayout
 from PyQt5.QtGui import QFont
 
 class DHT22GUI(QWidget):
     def __init__(self):
-        super().__init__()
+        super().__init()
 
         self.sensor = Adafruit_DHT.DHT22
         self.sensor_pin = 4
@@ -23,18 +23,12 @@ class DHT22GUI(QWidget):
 
         self.result_label = QLabel(self)
         self.result_label.setFont(QFont("Helvetica", 16))
-        self.update_button = QPushButton("Update", self)
-        self.quit_button = QPushButton("Quit", self)
 
         layout = QVBoxLayout()
         layout.addWidget(self.result_label)
-        layout.addWidget(self.update_button)
-        layout.addWidget(self.quit_button)
+        # No need to add the buttons here
 
         self.setLayout(layout)
-
-        self.update_button.clicked.connect(self.read_sensor_data)
-        self.quit_button.clicked.connect(self.close)
 
         self.read_sensor_data()
 
@@ -55,4 +49,3 @@ if __name__ == '__main__':
     window = DHT22GUI()
     window.show()
     sys.exit(app.exec_())
-    
