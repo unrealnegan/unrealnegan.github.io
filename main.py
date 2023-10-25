@@ -55,3 +55,4 @@ if __name__ == '__main__':
     window = DHT22GUI()
     window.show()
     sys.exit(app.exec_())
+    
