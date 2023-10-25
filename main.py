@@ -2,7 +2,7 @@ import Adafruit_DHT
 import sys
 from PyQt5.QtCore import QTimer, QDateTime
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QVBoxLayout
-from PyQt5.QtGui import QFont, QPalette
+from PyQt5.QtGui import QFont
 
 class DHT22GUI(QWidget):
     def __init__(self):
@@ -14,17 +14,12 @@ class DHT22GUI(QWidget):
         self.init_ui()
 
     def init_ui(self):
-        palette = QPalette()
-        palette.setColor(QPalette.Background, 0)  # Set background color to black
-        self.setPalette(palette)
+        self.setStyleSheet("background-color: black; color: white;")
 
         self.result_label = QLabel(self)
         self.result_label.setFont(QFont("Helvetica", 16))
         self.update_button = QPushButton("Update", self)
         self.quit_button = QPushButton("Quit", self)
-
-        # Set button style (transparent with red border)
-        self.update_button.setStyleSheet("background: transparent; border: 2px solid red; color: white;")
 
         layout = QVBoxLayout()
         layout.addWidget(self.result_label)
@@ -45,7 +40,7 @@ class DHT22GUI(QWidget):
         humidity, temperature = Adafruit_DHT.read_retry(self.sensor, self.sensor_pin)
         if humidity is not None and temperature is not None:
             current_time = QDateTime.currentDateTime().toString("yyyy-MM-dd HH:mm:ss")
-            data = "Time: {}\nTemp={:.1f}°C, Humidity={:.1f}%".format(current_time, temperature, humidity)
+            data = "Time: {}\nTemp: {:.1f}°C\nHumidity: {:.1f}%".format(current_time, temperature, humidity)
             self.result_label.setText(data)
         else:
             self.result_label.setText("Sensor failure.")
