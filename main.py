@@ -1,88 +1,52 @@
-import requests
-import tkinter as tk
-from datetime import datetime
 import Adafruit_DHT
+import sys
+from PyQt5.QtCore import QTimer, QDateTime
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QVBoxLayout
+from PyQt5.QtGui import QFont
 
-sensor_update_interval = 60
+class DHT22GUI(QWidget):
+    def __init__(self):
+        super().__init__()
 
-def read_sensor_data():
-    humidity, temperature = Adafruit_DHT.read_retry(sensor, sensor_pin)
-    if humidity is not None and temperature is not None:
-        current_time = datetime.now().strftime("%H:%M:%S")
-        data = "Time: {}\nRaumtemperatur: {:.1f}°C\nLuftfeuchtigkeit: {:.1f}%".format(current_time, temperature, humidity)
-        result_label.config(text=data)
-        result_label.config(fg="green") 
-    else:
-        result_label.config(text="Sensorfehler. Überprüfen Sie die Verkabelung.")
-        result_label.config(fg="red") 
-    root.after(sensor_update_interval * 1000, read_sensor_data) 
+        self.sensor = Adafruit_DHT.DHT22
+        self.sensor_pin = 4
 
-def get_weather_data(api_key, city):
-    base_url = "http://api.openweathermap.org/data/2.5/weather"
-    params = {
-        "q": city,
-        "appid": api_key,
-        "units": "metric" 
-    }
-    response = requests.get(base_url, params=params)
-    data = response.json()
+        self.init_ui()
 
-    if data["cod"] == 200:
-        temperature = data["main"]["temp"]
-        humidity = data["main"]["humidity"]
-        weather_description = data["weather"][0]["description"]
-        return f"Wetter in {city}:\nTemperatur: {temperature}°C\nLuftfeuchtigkeit: {humidity}%\nBeschreibung: {weather_description}"
-    else:
-        return f"Wetterdaten für {city} konnten nicht abgerufen werden"
+    def init_ui(self):
+        self.setStyleSheet("background-color: black; color: white;")
 
-def fetch_and_display_weather():
-    api_key = "0c6683cbab73a6db35283e25e4c50663"
-    city = "Ebermannstadt, DE"
-    weather_data = get_weather_data(api_key, city)
-    result_label.config(text=weather_data)
-    result_label.config(fg="green")
+        self.result_label = QLabel(self)
+        self.result_label.setFont(QFont("Helvetica", 16))
+        self.update_button = QPushButton("Update", self)
+        self.quit_button = QPushButton("Quit", self)
 
-root = tk.Tk()
-root.title("DHT22-GUI")
+        layout = QVBoxLayout()
+        layout.addWidget(self.result_label)
+        layout.addWidget(self.update_button)
+        layout.addWidget(self.quit_button)
 
-sensor = Adafruit_DHT.DHT22
-sensor_pin = 4
+        self.setLayout(layout)
 
-root.geometry("300x150")
-root.configure(bg="white")
+        self.update_button.clicked.connect(self.read_sensor_data)
+        self.quit_button.clicked.connect(self.close)
 
-frame = tk.Frame(root, bg="white")
-frame.pack(pady=20)
+        self.read_sensor_data()
 
-result_label = tk.Label(frame, text="", font=("Helvetica", 16), bg="white")
-result_label.pack()
+        self.setWindowTitle("DHT22-GUI")
+        self.setGeometry(100, 100, 400, 200)
 
-update_button = tk.Button(root, text="Jetzt aktualisieren", command=read_sensor_data)
-update_button.pack()
+    def read_sensor_data(self):
+        humidity, temperature = Adafruit_DHT.read_retry(self.sensor, self.sensor_pin)
+        if humidity is not None and temperature is not None:
+            current_time = QDateTime.currentDateTime().toString("HH:mm:ss")
+            data = "Time: {}\nTemp={:.1f}°C, Humidity={:.1f}%".format(current_time, temperature, humidity)
+            self.result_label.setText(data)
+        else:
+            self.result_label.setText("Sensor failure.")
 
-weather_button = tk.Button(root, text="Wetter abrufen", command=fetch_and_display_weather)
-weather_button.pack()
-
-quit_button = tk.Button(root, text="Beenden", command=root.quit)
-quit_button.pack()
-
-update_interval_label = tk.Label(root, text="Aktualisierungsintervall (s):", bg="white")
-update_interval_label.pack()
-update_interval_entry = tk.Entry(root)
-update_interval_entry.insert(0, str(sensor_update_interval))
-update_interval_entry.pack()
-
-def set_custom_update_interval():
-    global sensor_update_interval
-    try:
-        sensor_update_interval = int(update_interval_entry.get())
-        read_sensor_data()  
-    except ValueError:
-        pass
-
-update_interval_button = tk.Button(root, text="Setzen", command=set_custom_update_interval)
-update_interval_button.pack()
-
-read_sensor_data()
-
-root.mainloop()
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    window = DHT22GUI()
+    window.show()
+    sys.exit(app.exec_())
